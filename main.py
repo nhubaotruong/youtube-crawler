@@ -24,7 +24,7 @@ playlist_url_handler = PlaylistUrlHandler(
 
 url_handlers = [channel_url_handler, user_url_handler, playlist_url_handler]
 
-url = raw_input('\nPlease enter a valid youtube channel/account/playlist url:\n')
+url = input('\nPlease enter a valid youtube channel/account/playlist url:\n')
 
 playlist_id, error = None, False
 

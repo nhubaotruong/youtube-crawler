@@ -1,7 +1,10 @@
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from database_handler import insert_videos_info
 
-image_downloader = urllib.URLopener()
+from urllib.request import urlopen as image_downloader
+import json
+from re import search
+from dateutil import parser
 
 class ApiRequestsHandler(object):
     '''
@@ -92,24 +95,48 @@ class ApiV3RequestsHandler(ApiRequestsHandler):
         }
 
         videos = []
-
+        
+        # needed = []
         response = self.service_client.videos().list(**args).execute()
         
         for i in response['items']:
 
-            thumbnail = i['snippet']['thumbnails']['default']['url']
-            image = i['snippet']['thumbnails']['high']['url']
+            # thumbnail = i['snippet']['thumbnails']['default']['url']
+            # image = i['snippet']['thumbnails']['high']['url']
 
-            thumbnail_url = 'images//'+i['id']+'-thumb'+'.jpg'
-            image_url = 'images//'+i['id']+'.jpg'
+            # thumbnail_url = 'images//'+i['id']+'-thumb'+'.jpg'
+            # image_url = 'images//'+i['id']+'.jpg'
 
-            image_downloader.retrieve(thumbnail, thumbnail_url)
-            image_downloader.retrieve(image, image_url)
+            # image_downloader.retrieve(thumbnail, thumbnail_url)
+            # image_downloader.retrieve(image, image_url)
 
             url = 'https://www.youtube.com/watch?v=' + i['id']
-            video = (i['snippet']['title'], i['contentDetails']['duration'], 
-                     i['statistics']['viewCount'], url, thumbnail_url, image_url)
+            title = i['snippet']['title']
+            description = i['snippet']['description']
+            duration = i['contentDetails']['duration']
+            publishedDate = i['snippet']['publishedAt']
+            parsed_time = parser.parse(publishedDate)
+            viewCount = i['statistics']['viewCount']
+            video = (title, description, duration, parsed_time, viewCount, url)
             
+            # try:
+            #     name = search('(.+) \|', title).group(1)
+            # except Exception:
+            #     name = ''
+
+            # try:
+            #     nguyen_lieu = description.partition("NGUYÊN LIỆU:")[2].partition("#")[0]
+            # except Exception:
+            #     nguyen_lieu = ''
+
+            # needer = {
+            #     'time': parsed_time,
+            #     'name': name,
+            #     'nguyen_lieu': nguyen_lieu
+            # }
+            # needed.append(needer)
             videos.append(video)
         
         insert_videos_info(videos)
+        # with open('output.json', mode='w', encoding='utf-8') as file:
+        #     json.dump(needed, file)
